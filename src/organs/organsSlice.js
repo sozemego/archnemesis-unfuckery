@@ -25,7 +25,7 @@ if (!organsFromStorage) {
 }
 
 if (!trackedRecipesFromStorage) {
-  saveTrackedRecipesToLocalStorage(trackedRecipesFromStorage);
+  saveTrackedRecipesToLocalStorage([]);
 } else {
   initialState.trackedRecipes = JSON.parse(trackedRecipesFromStorage);
 }
