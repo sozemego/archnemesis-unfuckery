@@ -3,9 +3,7 @@ import { getOrganByName, ORGANS } from "../data/organs";
 
 const initialState = {
   organs: {},
-  trackedRecipes: ORGANS.filter((organ) => organ.ingredients.length > 0).map(
-    (organ) => organ.name
-  ),
+  trackedRecipes: [],
   hovered: null,
 };
 
