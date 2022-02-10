@@ -1,12 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import {
-  CloseOutlined,
-  MinusCircleOutlined,
-  NodeIndexOutlined,
-  PlusCircleOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Row } from "antd";
-import {
   clearAll,
   decrementOrgan,
   getOrganCount,
@@ -29,6 +22,7 @@ export function Organs() {
 }
 
 function OrganIcon(props) {
+  return null;
   return <img src={props.icon} style={{ width: "48px", height: "48px" }} />;
 }
 
@@ -61,11 +55,11 @@ function Organ(props) {
 
   function getBorder() {
     if (isIngredientOfHoveredOrgan) {
-      return "5px solid orange";
+      return "1px solid orange";
     }
 
     if (isHoveredItemPartOfRecipeForMe) {
-      return "3px solid red";
+      return "1px solid red";
     }
 
     if (hoveredOrganName === organ.name && hoverStatesEnabled) {
@@ -88,6 +82,7 @@ function Organ(props) {
         width: 128 * 2,
         height: 88,
         padding: 12,
+        margin: 4,
         border: getBorder(),
         background: canBeCompleted
           ? "#9ac29a"
@@ -95,7 +90,7 @@ function Organ(props) {
           ? "#c4bbbb"
           : "white",
       }}
-      onMouseOver={() => dispatch(setHovered(organ.name))}
+      onMouseOver={() => hoverStatesEnabled && dispatch(setHovered(organ.name))}
     >
       <div
         style={{
@@ -119,11 +114,9 @@ function Organ(props) {
             alignItems: "center",
           }}
         >
-          <Button
-            type="dashed"
-            icon={<MinusCircleOutlined />}
-            onClick={() => dispatch(decrementOrgan(organ.name))}
-          />{" "}
+          <button onClick={() => dispatch(decrementOrgan(organ.name))}>
+            -
+          </button>
           <div
             style={{
               minWidth: "36px",
@@ -133,31 +126,31 @@ function Organ(props) {
           >
             {getCount()}
           </div>
-          <Button
-            type="dashed"
-            icon={<PlusCircleOutlined />}
-            onClick={() => dispatch(incrementOrgan(organ.name))}
-          />
+          <button onClick={() => dispatch(incrementOrgan(organ.name))}>
+            +
+          </button>
         </div>
         <div
           style={{
-            visibility: canBeCompleted ? "visible" : "hidden",
             display: "flex",
             justifyContent: "center",
           }}
         >
-          <Button onClick={() => dispatch(completeRecipe(organ.name))}>
+          <button
+            onClick={() =>
+              canBeCompleted && dispatch(completeRecipe(organ.name))
+            }
+            style={{ color: canBeCompleted ? "black" : "gray" }}
+          >
             COMPLETE
-          </Button>
+          </button>
         </div>
       </div>
-      <Button
-        icon={
-          <NodeIndexOutlined
-            onClick={() => dispatch(toggleTracking(organ.name))}
-          />
-        }
-      />
+      {hoverStatesEnabled && organ.ingredients.length > 0 && (
+        <button onClick={() => dispatch(toggleTracking(organ.name))}>
+          TRACK
+        </button>
+      )}
     </div>
   );
 }
@@ -191,9 +184,9 @@ function OrganList() {
           marginRight: "96px",
         }}
       >
-        <Button onClick={() => dispatch(clearAll())}>CLEAR ALL</Button>
+        <button onClick={() => dispatch(clearAll())}>CLEAR ALL</button>
       </div>
-      <Row>
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
         {ORGANS.map((organ) => (
           <Organ
             key={organ.name}
@@ -202,7 +195,7 @@ function OrganList() {
             hoverStatesEnabled={true}
           />
         ))}
-      </Row>
+      </div>
     </div>
   );
 }
@@ -234,10 +227,9 @@ function Recipe(props) {
       }}
     >
       {props.topLevel && (
-        <Button
-          icon={<CloseOutlined />}
-          onClick={() => dispatch(toggleTracking(props.recipe))}
-        />
+        <button onClick={() => dispatch(toggleTracking(props.recipe))}>
+          STOP TRACKING
+        </button>
       )}
       <Organ organ={organ} recipes={props.recipes} hoverStatesEnabled={false} />
       <div style={{ paddingLeft: "8px", paddingTop: "8px" }}>
