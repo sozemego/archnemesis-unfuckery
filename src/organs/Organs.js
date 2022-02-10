@@ -136,14 +136,16 @@ function Organ(props) {
             justifyContent: "center",
           }}
         >
-          <button
-            onClick={() =>
-              canBeCompleted && dispatch(completeRecipe(organ.name))
-            }
-            style={{ color: canBeCompleted ? "black" : "gray" }}
-          >
-            COMPLETE
-          </button>
+          {organ.ingredients.length > 0 && (
+            <button
+              onClick={() =>
+                canBeCompleted && dispatch(completeRecipe(organ.name))
+              }
+              style={{ color: canBeCompleted ? "black" : "gray" }}
+            >
+              COMPLETE
+            </button>
+          )}
         </div>
       </div>
       {hoverStatesEnabled && organ.ingredients.length > 0 && (
