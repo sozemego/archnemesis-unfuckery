@@ -1,3 +1,4 @@
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearAll,
@@ -9,14 +10,79 @@ import {
   getHovered,
   getTrackedRecipes,
   toggleTracking,
+  setStateFromPoeArchnemesisScanner,
 } from "./organsSlice";
 import { getOrganByName, ORGANS } from "../data/organs";
 
 export function Organs() {
   return (
     <div style={{ marginLeft: "24px" }}>
+      <OrganParser />
       <OrganList />
       <RecipeTracker />
+    </div>
+  );
+}
+
+/**
+ * {'Abberath-Touched': [(551, 208)], 'Brine King-Touched': [(551, 62)], 'Frost Strider': [(405, 62)], 'Treant Horder': [(551, 135), (41, 280), (41, 353), (41, 426), (41, 499)], 'Drought Bringer': [(260, 62)], 'Rejuvenating': [(187, 280)], 'Necromancer': [(478, 280)], 'Assassin': [(114, 499), (114, 572)], 'Heralding Minions': [(332, 572)], 'Berserker': [(114, 353)], 'Bombardier': [(114, 208), (405, 353)], 'Deadeye': [(260, 135), (260, 208), (332, 208)], 'Dynamo': [(41, 62), (332, 135)], 'Echoist': [(41, 135)], 'Flameweaver': [(187, 135), (187, 208), (114, 280), (332, 353)], 'Frostweaver': [(114, 62), (478, 135), (260, 353)], 'Gargantuan': [(405, 426), (405, 499), (405, 572)], 'Hasted': [(114, 135), (405, 135), (260, 280)], 'Incendiary': [(478, 572)], 'Juggernaut': [(405, 280)], 'Overcharged': [(260, 499)], 'Sentinel': [(187, 353), (260, 426), (260, 572)], 'Soul Conduit': [(405, 208), (551, 499), (551, 572)], 'Steel-Infused': [(41, 208), (41, 572)], 'Stormweaver': [(187, 62), (332, 426)], 'Toxic': [(332, 62), (114, 426)], 'Vampiric': [(332, 280), (332, 499)]}
+ */
+
+const fixMap = {
+  "Treant Horder": "Treant Horde",
+  "Steel-Infused": "Steel-infused",
+  "Crystal-Skinned": "Crystal-skinned",
+};
+
+function fixInput(organs) {
+  Object.entries(fixMap).forEach(([key, value]) => {
+    if (organs[key]) {
+      organs[value] = organs[key];
+      delete organs[key];
+    }
+  });
+}
+
+function parseFromPoeArchnemesisScanner(input) {
+  let regex = /\(.{1,8}\)/g;
+  input = input.trim();
+  input = input.replaceAll("'", '"');
+  input = input.replaceAll(regex, '"A"');
+
+  let organs = JSON.parse(input);
+
+  fixInput(organs);
+
+  let correctOrgans = {};
+
+  Object.entries(organs).forEach(([key, value]) => {
+    correctOrgans[key] = value.length;
+  });
+
+  return correctOrgans;
+}
+
+export function OrganParser(props) {
+  const [value, setValue] = React.useState("");
+  const dispatch = useDispatch();
+
+  return (
+    <div style={{ display: "flex" }}>
+      <span>Paste output from poe-archnemesis-scanner</span>
+      <input value={value} onChange={(e) => setValue(e.target.value)} />
+      <button
+        onClick={() => {
+          dispatch(
+            setStateFromPoeArchnemesisScanner(
+              parseFromPoeArchnemesisScanner(value)
+            )
+          );
+          setValue("");
+        }}
+        disabled={!value}
+      >
+        IMPORT
+      </button>
     </div>
   );
 }

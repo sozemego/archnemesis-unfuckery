@@ -81,6 +81,15 @@ export const organSlice = createSlice({
       }
       saveTrackedRecipesToLocalStorage(state.trackedRecipes);
     },
+    setStateFromPoeArchnemesisScanner: (state, action) => {
+      initEmptyOrgans(state.organs);
+
+      Object.entries(action.payload).forEach(([key, value]) => {
+        state.organs[key] = value;
+      });
+
+      saveOrgansToLocalStorage(state.organs);
+    },
   },
 });
 
@@ -91,6 +100,7 @@ export const {
   completeRecipe,
   setHovered,
   toggleTracking,
+  setStateFromPoeArchnemesisScanner,
 } = organSlice.actions;
 
 export const getOrganCount = (state) => state.organs.organs;
