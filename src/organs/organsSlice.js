@@ -82,6 +82,9 @@ export const organSlice = createSlice({
       saveTrackedRecipesToLocalStorage(state.trackedRecipes);
     },
     setStateFromPoeArchnemesisScanner: (state, action) => {
+      if (Object.entries(action.payload).length === 0) {
+        return;
+      }
       initEmptyOrgans(state.organs);
 
       Object.entries(action.payload).forEach(([key, value]) => {

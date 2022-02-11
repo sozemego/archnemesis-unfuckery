@@ -15,8 +15,19 @@ import {
 import { getOrganByName, ORGANS } from "../data/organs";
 
 export function Organs() {
+  const dispatch = useDispatch();
+
   return (
-    <div style={{ marginLeft: "24px" }}>
+    <div
+      style={{ marginLeft: "24px" }}
+      onPaste={(event) => {
+        dispatch(
+          setStateFromPoeArchnemesisScanner(
+            parseFromPoeArchnemesisScanner(event.clipboardData.getData("text"))
+          )
+        );
+      }}
+    >
       <OrganParser />
       <OrganList />
       <RecipeTracker />
@@ -40,28 +51,36 @@ function fixInput(organs) {
 }
 
 function parseFromPoeArchnemesisScanner(input) {
-  let regex = /\(.{1,8}\)/g;
-  input = input.trim();
-  let parts = input.split("{");
-  if (parts.length > 1) {
-    input = "{" + parts[1];
-  } else {
-    input = parts[0];
+  if (typeof input !== "string") {
+    return {};
   }
-  input = input.replaceAll("'", '"');
-  input = input.replaceAll(regex, '"A"');
+  try {
+    let regex = /\(.{1,8}\)/g;
+    input = input.trim();
+    let parts = input.split("{");
+    if (parts.length > 1) {
+      input = "{" + parts[1];
+    } else {
+      input = parts[0];
+    }
+    input = input.replaceAll("'", '"');
+    input = input.replaceAll(regex, '"A"');
 
-  let organs = JSON.parse(input);
+    let organs = JSON.parse(input);
 
-  fixInput(organs);
+    fixInput(organs);
 
-  let correctOrgans = {};
+    let correctOrgans = {};
 
-  Object.entries(organs).forEach(([key, value]) => {
-    correctOrgans[key] = value.length;
-  });
+    Object.entries(organs).forEach(([key, value]) => {
+      correctOrgans[key] = value.length;
+    });
 
-  return correctOrgans;
+    return correctOrgans;
+  } catch (e) {
+    console.error(e);
+  }
+  return {};
 }
 
 export function OrganParser(props) {
@@ -69,11 +88,23 @@ export function OrganParser(props) {
   const dispatch = useDispatch();
 
   return (
-    <div style={{ display: "flex" }}>
-      <span>Paste output from poe-archnemesis-scanner</span>
-      <input value={value} onChange={(e) => setValue(e.target.value)} />
-      <button
-        onClick={() => {
+    <div
+      style={{
+        display: "flex",
+        position: "fixed",
+        bottom: "40px",
+        right: "20px",
+        zIndex: 500,
+        background: "white",
+      }}
+    >
+      <span>
+        ctrl+v anywhere or in this box to import from poe-archnemesis-scanner
+      </span>
+      <input
+        value={value}
+        onPaste={(event) => {
+          const value = event.clipboardData.getData("text");
           dispatch(
             setStateFromPoeArchnemesisScanner(
               parseFromPoeArchnemesisScanner(value)
@@ -81,17 +112,13 @@ export function OrganParser(props) {
           );
           setValue("");
         }}
-        disabled={!value}
-      >
-        IMPORT
-      </button>
+      />
     </div>
   );
 }
 
 function OrganIcon(props) {
   return null;
-  return <img src={props.icon} style={{ width: "48px", height: "48px" }} />;
 }
 
 function Organ(props) {
@@ -158,18 +185,18 @@ function Organ(props) {
 
   function getBorder() {
     if (isIngredientOfHoveredOrgan) {
-      return "1px solid orange";
+      return "3px solid blue";
     }
 
     if (isHoveredItemPartOfRecipeForMe) {
-      return "1px solid red";
+      return "3px solid red";
     }
 
     if (hoveredOrganName === organ.name) {
-      return "1px solid orange";
+      return "3px solid orange";
     }
 
-    return "1px solid gray";
+    return "3px solid gray";
   }
 
   function getCount() {
@@ -182,8 +209,8 @@ function Organ(props) {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        width: 128 * 2,
-        height: 88,
+        width: 175,
+        height: 64,
         padding: 12,
         margin: 4,
         border: getBorder(),
@@ -210,6 +237,11 @@ function Organ(props) {
       >
         <OrganIcon icon={organ.icon} />
         <OrganTitle organ={organ} />
+        {organ.ingredients.length > 0 && (
+          <button onClick={() => dispatch(toggleTracking(organ.name))}>
+            TRACK
+          </button>
+        )}
       </div>
       <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         <div
@@ -255,11 +287,6 @@ function Organ(props) {
           )}
         </div>
       </div>
-      {organ.ingredients.length > 0 && (
-        <button onClick={() => dispatch(toggleTracking(organ.name))}>
-          TRACK
-        </button>
-      )}
     </div>
   );
 }
@@ -331,6 +358,9 @@ function Recipe(props) {
         display: "flex",
         justifyContent: "flex-start",
         flexDirection: "row",
+        borderBottom: props.topLevel
+          ? "2px dashed gray"
+          : "1px solid transparent",
       }}
     >
       {props.topLevel && (
@@ -391,7 +421,7 @@ function RecipeOrgan(props) {
         flexDirection: "row",
         alignItems: "center",
         width: 128 * 2,
-        height: 88,
+        height: 64,
         padding: 12,
         margin: 4,
         border: getBorder(),
