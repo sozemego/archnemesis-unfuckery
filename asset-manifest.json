@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/archnemesis-unfuckery/static/css/main.9303b3de.css",
-    "main.js": "/archnemesis-unfuckery/static/js/main.42288cb8.js",
+    "main.js": "/archnemesis-unfuckery/static/js/main.cf1ed623.js",
     "static/js/787.7be6e697.chunk.js": "/archnemesis-unfuckery/static/js/787.7be6e697.chunk.js",
     "index.html": "/archnemesis-unfuckery/index.html",
     "main.9303b3de.css.map": "/archnemesis-unfuckery/static/css/main.9303b3de.css.map",
-    "main.42288cb8.js.map": "/archnemesis-unfuckery/static/js/main.42288cb8.js.map",
+    "main.cf1ed623.js.map": "/archnemesis-unfuckery/static/js/main.cf1ed623.js.map",
     "787.7be6e697.chunk.js.map": "/archnemesis-unfuckery/static/js/787.7be6e697.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.9303b3de.css",
-    "static/js/main.42288cb8.js"
+    "static/js/main.cf1ed623.js"
   ]
 }
