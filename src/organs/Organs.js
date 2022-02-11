@@ -13,6 +13,7 @@ import {
   setStateFromPoeArchnemesisScanner,
 } from "./organsSlice";
 import { getOrganByName, ORGANS } from "../data/organs";
+import { REWARDS } from "../data/rewards";
 
 export function Organs() {
   const dispatch = useDispatch();
@@ -113,7 +114,7 @@ export function OrganParser(props) {
       <input
         value={value}
         onPaste={(event) => {
-          const value = event.clipboardData.getData("text");
+          const value = event.clipboardData.getData("text") || "";
           dispatch(
             setStateFromPoeArchnemesisScanner(
               parseFromPoeArchnemesisScanner(value)
@@ -246,6 +247,7 @@ function Organ(props) {
       >
         <OrganIcon icon={organ.icon} />
         <OrganTitle organ={organ} />
+        <OrganRewards organ={organ} />
         {organ.ingredients.length > 0 && (
           <button onClick={() => dispatch(toggleTracking(organ.name))}>
             TRACK
@@ -314,6 +316,26 @@ function OrganTitle(props) {
   );
 }
 
+function OrganRewards(props) {
+  const organ = props.organ;
+  const rewards = organ.rewards;
+
+  return (
+    <div style={{ display: "flex", flexWrap: "nowrap" }}>
+      {rewards.map((reward) => (
+        <img
+          src={REWARDS[reward].icon}
+          style={{
+            width: "24px",
+            height: "24px",
+            marginLeft: "2px",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function OrganList() {
   const organsMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
@@ -341,7 +363,7 @@ function OrganList() {
 }
 
 /**
- *
+ * Returns all organs for which the user has enough parts to complete the recipe.
  */
 function calcRecipes(organsMap) {
   return ORGANS.filter((organ) => {
@@ -406,7 +428,6 @@ function Recipe(props) {
 function RecipeOrgan(props) {
   const organCountMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
-  const hoveredOrganName = useSelector(getHovered);
 
   const organ = props.organ;
   const recipes = props.recipes;

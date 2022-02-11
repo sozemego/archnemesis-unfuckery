@@ -284,7 +284,7 @@ export const ORGANS = [
     icon: "https://web.poecdn.com/image/Art/2DItems/Currency/Archnemesis/ModRecipeExecutioner.png?locale=1",
     description:
       "Monster gains Damage based on missing enemy Life. Monster has an aura that prevents enemies recovering Life and Energy Shield above 50%",
-    rewards: ["Legion", "breach"],
+    rewards: ["Legion", "Breach"],
     tier: 2,
     ingredients: ["Frenzied", "Berserker"],
   },
