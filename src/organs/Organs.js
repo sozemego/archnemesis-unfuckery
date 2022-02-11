@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearAll,
@@ -39,6 +39,15 @@ const fixMap = {
   "Treant Horder": "Treant Horde",
   "Steel-Infused": "Steel-infused",
   "Crystal-Skinned": "Crystal-skinned",
+  "Kitava-Touched": "Kitava-touched",
+  "Innocence-Touched": "Innocence-touched",
+  "Shakari-Touched": "Shakari-touched",
+  "Abberath-Touched": "Abberath-touched",
+  "Tukohama-Touched": "Tukohama-touched",
+  "Brine King-Touched": "Brine King-touched",
+  "Arakaali-Touched": "Arakaali-touched",
+  "Solaris-Touched": "Solaris-touched",
+  "Lunaris-Touched": "Lunaris-touched",
 };
 
 function fixInput(organs) {
@@ -357,7 +366,8 @@ function Recipe(props) {
       style={{
         display: "flex",
         justifyContent: "flex-start",
-        flexDirection: "row",
+        flexDirection: props.orientation === "horizontal" ? "row" : "column",
+        minWidth: "386px",
         borderBottom: props.topLevel
           ? "2px dashed gray"
           : "1px solid transparent",
@@ -369,13 +379,23 @@ function Recipe(props) {
         </button>
       )}
       <RecipeOrgan organ={organ} recipes={props.recipes} />
-      <div style={{ paddingLeft: "8px", paddingTop: "8px" }}>
+      <div
+        style={{
+          paddingLeft: props.orientation === "vertical" ? "24px" : "8px",
+          paddingTop: "8px",
+          borderLeft:
+            props.orientation === "vertical"
+              ? "1px dashed black"
+              : "1px solid transparent",
+        }}
+      >
         {ingredients.map((ingredient) => (
           <Recipe
             key={ingredient}
             recipe={ingredient}
             recipes={props.recipes}
             topLevel={false}
+            orientation={props.orientation}
           />
         ))}
       </div>
@@ -395,18 +415,6 @@ function RecipeOrgan(props) {
     recipes.filter((recipe) => recipe.name === organ.name).length > 0;
 
   function getBorder() {
-    // if (isIngredientOfHoveredOrgan) {
-    //   return "1px solid orange";
-    // }
-    //
-    // if (isHoveredItemPartOfRecipeForMe) {
-    //   return "1px solid red";
-    // }
-    //
-    // if (hoveredOrganName === organ.name && hoverStatesEnabled) {
-    //   return "1px solid orange";
-    // }
-
     return "1px solid gray";
   }
 
@@ -421,7 +429,7 @@ function RecipeOrgan(props) {
         flexDirection: "row",
         alignItems: "center",
         width: 128 * 2,
-        height: 64,
+        height: 36,
         padding: 12,
         margin: 4,
         border: getBorder(),
@@ -492,23 +500,53 @@ function RecipeOrgan(props) {
   );
 }
 
+const initialOrientation =
+  localStorage.getItem("recipeTrackerOrientation") || "vertical";
+
 function RecipeTracker(props) {
   const trackedRecipes = useSelector(getTrackedRecipes);
   const organsMap = useSelector(getOrganCount);
 
   const recipes = calcRecipes(organsMap);
+  const [orientation, setOrientation] = React.useState(initialOrientation);
+
+  React.useEffect(() => {
+    localStorage.setItem("recipeTrackerOrientation", orientation);
+  }, [orientation]);
 
   return (
     <div>
       <h2>Recipe tracker</h2>
-      {trackedRecipes.map((recipe) => (
-        <Recipe
-          key={recipe}
-          recipe={recipe}
-          recipes={recipes}
-          topLevel={true}
-        />
-      ))}
+      <button
+        onClick={() => setOrientation("horizontal")}
+        style={{ fontSize: orientation === "horizontal" ? 24 : "inherit" }}
+      >
+        Horizontal
+      </button>
+      <button
+        onClick={() => setOrientation("vertical")}
+        style={{ fontSize: orientation === "vertical" ? 24 : "inherit" }}
+      >
+        Vertical
+      </button>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          flexWrap: "wrap",
+          flexDirection: "row",
+        }}
+      >
+        {trackedRecipes.map((recipe) => (
+          <Recipe
+            key={recipe}
+            recipe={recipe}
+            recipes={recipes}
+            orientation={orientation}
+            topLevel={true}
+          />
+        ))}
+      </div>
     </div>
   );
 }
