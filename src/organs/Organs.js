@@ -24,10 +24,6 @@ export function Organs() {
   );
 }
 
-/**
- * {'Abberath-Touched': [(551, 208)], 'Brine King-Touched': [(551, 62)], 'Frost Strider': [(405, 62)], 'Treant Horder': [(551, 135), (41, 280), (41, 353), (41, 426), (41, 499)], 'Drought Bringer': [(260, 62)], 'Rejuvenating': [(187, 280)], 'Necromancer': [(478, 280)], 'Assassin': [(114, 499), (114, 572)], 'Heralding Minions': [(332, 572)], 'Berserker': [(114, 353)], 'Bombardier': [(114, 208), (405, 353)], 'Deadeye': [(260, 135), (260, 208), (332, 208)], 'Dynamo': [(41, 62), (332, 135)], 'Echoist': [(41, 135)], 'Flameweaver': [(187, 135), (187, 208), (114, 280), (332, 353)], 'Frostweaver': [(114, 62), (478, 135), (260, 353)], 'Gargantuan': [(405, 426), (405, 499), (405, 572)], 'Hasted': [(114, 135), (405, 135), (260, 280)], 'Incendiary': [(478, 572)], 'Juggernaut': [(405, 280)], 'Overcharged': [(260, 499)], 'Sentinel': [(187, 353), (260, 426), (260, 572)], 'Soul Conduit': [(405, 208), (551, 499), (551, 572)], 'Steel-Infused': [(41, 208), (41, 572)], 'Stormweaver': [(187, 62), (332, 426)], 'Toxic': [(332, 62), (114, 426)], 'Vampiric': [(332, 280), (332, 499)]}
- */
-
 const fixMap = {
   "Treant Horder": "Treant Horde",
   "Steel-Infused": "Steel-infused",
@@ -46,6 +42,12 @@ function fixInput(organs) {
 function parseFromPoeArchnemesisScanner(input) {
   let regex = /\(.{1,8}\)/g;
   input = input.trim();
+  let parts = input.split("{");
+  if (parts.length > 1) {
+    input = "{" + parts[1];
+  } else {
+    input = parts[0];
+  }
   input = input.replaceAll("'", '"');
   input = input.replaceAll(regex, '"A"');
 
@@ -96,17 +98,17 @@ function Organ(props) {
   const organCountMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
   const hoveredOrganName = useSelector(getHovered);
+  const trackedRecipes = useSelector(getTrackedRecipes);
 
   const organ = props.organ;
   const recipes = props.recipes;
-  const hoverStatesEnabled = props.hoverStatesEnabled;
 
   let isIngredientOfHoveredOrgan = false;
   let isHoveredItemPartOfRecipeForMe = false;
 
   const hoveredOrgan = getOrganByName(hoveredOrganName);
 
-  if (hoveredOrgan && hoverStatesEnabled) {
+  if (hoveredOrgan) {
     isIngredientOfHoveredOrgan =
       hoveredOrgan.ingredients.filter((ingredient) => ingredient === organ.name)
         .length > 0;
@@ -119,6 +121,41 @@ function Organ(props) {
   let canBeCompleted =
     recipes.filter((recipe) => recipe.name === organ.name).length > 0;
 
+  let inAnyTrackedRecipeAtAnyLevel = false;
+
+  function getAllIngredientsOfRecipe(recipe) {
+    const organ = getOrganByName(recipe);
+
+    if (!organ) {
+      throw new Error("No organ for recipe", recipe);
+    }
+
+    const allIngredients = [];
+
+    if (organ.ingredients.length === 0) {
+      return allIngredients;
+    }
+
+    for (let ingredient of organ.ingredients) {
+      allIngredients.push(ingredient);
+      allIngredients.push(...getAllIngredientsOfRecipe(ingredient));
+    }
+
+    return allIngredients;
+  }
+
+  for (let trackedRecipe of trackedRecipes) {
+    const ingredientsOfRecipe = getAllIngredientsOfRecipe(trackedRecipe);
+    for (let ingredient of ingredientsOfRecipe) {
+      if (ingredient === organ.name) {
+        inAnyTrackedRecipeAtAnyLevel = true;
+      }
+    }
+    if (trackedRecipe === organ.name) {
+      inAnyTrackedRecipeAtAnyLevel = true;
+    }
+  }
+
   function getBorder() {
     if (isIngredientOfHoveredOrgan) {
       return "1px solid orange";
@@ -128,7 +165,7 @@ function Organ(props) {
       return "1px solid red";
     }
 
-    if (hoveredOrganName === organ.name && hoverStatesEnabled) {
+    if (hoveredOrganName === organ.name) {
       return "1px solid orange";
     }
 
@@ -150,13 +187,17 @@ function Organ(props) {
         padding: 12,
         margin: 4,
         border: getBorder(),
+        borderTopLeftRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
+        borderBottomRightRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
         background: canBeCompleted
           ? "#9ac29a"
           : getCount() > 0
           ? "#c4bbbb"
           : "white",
+        // transform: "scale(" + inAnyTrackedRecipeAtAnyLevel ? 1.25 : 1 + ")",
+        transform: "scale(" + (inAnyTrackedRecipeAtAnyLevel ? 1 : 0.85) + ")",
       }}
-      onMouseOver={() => hoverStatesEnabled && dispatch(setHovered(organ.name))}
+      onMouseOver={() => dispatch(setHovered(organ.name))}
     >
       <div
         style={{
@@ -214,7 +255,7 @@ function Organ(props) {
           )}
         </div>
       </div>
-      {hoverStatesEnabled && organ.ingredients.length > 0 && (
+      {organ.ingredients.length > 0 && (
         <button onClick={() => dispatch(toggleTracking(organ.name))}>
           TRACK
         </button>
@@ -256,18 +297,16 @@ function OrganList() {
       </div>
       <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
         {ORGANS.map((organ) => (
-          <Organ
-            key={organ.name}
-            organ={organ}
-            recipes={recipes}
-            hoverStatesEnabled={true}
-          />
+          <Organ key={organ.name} organ={organ} recipes={recipes} />
         ))}
       </div>
     </div>
   );
 }
 
+/**
+ *
+ */
 function calcRecipes(organsMap) {
   return ORGANS.filter((organ) => {
     const ingredients = organ.ingredients;
@@ -299,7 +338,7 @@ function Recipe(props) {
           STOP TRACKING
         </button>
       )}
-      <Organ organ={organ} recipes={props.recipes} hoverStatesEnabled={false} />
+      <RecipeOrgan organ={organ} recipes={props.recipes} />
       <div style={{ paddingLeft: "8px", paddingTop: "8px" }}>
         {ingredients.map((ingredient) => (
           <Recipe
@@ -309,6 +348,115 @@ function Recipe(props) {
             topLevel={false}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function RecipeOrgan(props) {
+  const organCountMap = useSelector(getOrganCount);
+  const dispatch = useDispatch();
+  const hoveredOrganName = useSelector(getHovered);
+
+  const organ = props.organ;
+  const recipes = props.recipes;
+
+  let canBeCompleted =
+    recipes.filter((recipe) => recipe.name === organ.name).length > 0;
+
+  function getBorder() {
+    // if (isIngredientOfHoveredOrgan) {
+    //   return "1px solid orange";
+    // }
+    //
+    // if (isHoveredItemPartOfRecipeForMe) {
+    //   return "1px solid red";
+    // }
+    //
+    // if (hoveredOrganName === organ.name && hoverStatesEnabled) {
+    //   return "1px solid orange";
+    // }
+
+    return "1px solid gray";
+  }
+
+  function getCount() {
+    return organCountMap[organ.name];
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        width: 128 * 2,
+        height: 88,
+        padding: 12,
+        margin: 4,
+        border: getBorder(),
+        background: canBeCompleted
+          ? "#9ac29a"
+          : getCount() > 0
+          ? "#c4bbbb"
+          : "white",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "128px",
+          maxWidth: "128px",
+        }}
+      >
+        <OrganIcon icon={organ.icon} />
+        <OrganTitle organ={organ} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <button onClick={() => dispatch(decrementOrgan(organ.name))}>
+            -
+          </button>
+          <div
+            style={{
+              minWidth: "36px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {getCount()}
+          </div>
+          <button onClick={() => dispatch(incrementOrgan(organ.name))}>
+            +
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {organ.ingredients.length > 0 && (
+            <button
+              onClick={() =>
+                canBeCompleted && dispatch(completeRecipe(organ.name))
+              }
+              style={{ color: canBeCompleted ? "black" : "gray" }}
+            >
+              COMPLETE
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
