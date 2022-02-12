@@ -1,15 +1,39 @@
 {
   "files": {
     "main.css": "/archnemesis-unfuckery/static/css/main.9303b3de.css",
-    "main.js": "/archnemesis-unfuckery/static/js/main.cf1ed623.js",
+    "main.js": "/archnemesis-unfuckery/static/js/main.dac9d5d6.js",
     "static/js/787.7be6e697.chunk.js": "/archnemesis-unfuckery/static/js/787.7be6e697.chunk.js",
+    "static/media/delirium.png": "/archnemesis-unfuckery/static/media/delirium.cc3848c22de0e40c01c6.png",
+    "static/media/ritual.png": "/archnemesis-unfuckery/static/media/ritual.2e7e60d6d3e25ccfd268.png",
+    "static/media/expedition.png": "/archnemesis-unfuckery/static/media/expedition.89be1d6554686ec6998a.png",
+    "static/media/heist.png": "/archnemesis-unfuckery/static/media/heist.a4cf4a64fe856351cad8.png",
+    "static/media/abyss.png": "/archnemesis-unfuckery/static/media/abyss.3a0e1779f5cb76cd15ad.png",
+    "static/media/labyrinth.png": "/archnemesis-unfuckery/static/media/labyrinth.af8aa0db9788208d33a2.png",
+    "static/media/blight.png": "/archnemesis-unfuckery/static/media/blight.c4a73bfb662b639fbd37.png",
+    "static/media/metamorph.png": "/archnemesis-unfuckery/static/media/metamorph.6cdd35955bb495312fb1.png",
+    "static/media/divinationcards.png": "/archnemesis-unfuckery/static/media/divinationcards.1e8333b4552332340b9a.png",
+    "static/media/legion.png": "/archnemesis-unfuckery/static/media/legion.f7a694ac9ecd9495ee7a.png",
+    "static/media/harbinger.png": "/archnemesis-unfuckery/static/media/harbinger.e4e3c00eeb4ab028a589.png",
+    "static/media/currency.png": "/archnemesis-unfuckery/static/media/currency.22dd3180f08b79887859.png",
+    "static/media/fossils.png": "/archnemesis-unfuckery/static/media/fossils.b8a5f868142704d13b26.png",
+    "static/media/fragments.png": "/archnemesis-unfuckery/static/media/fragments.6520dac3a24d7c4b5014.png",
+    "static/media/trinkets.png": "/archnemesis-unfuckery/static/media/trinkets.f4726c50988b144781b4.png",
+    "static/media/generic.png": "/archnemesis-unfuckery/static/media/generic.ab58fdc031fb450b362b.png",
+    "static/media/scarabs.png": "/archnemesis-unfuckery/static/media/scarabs.d0f6f4f5058d2f823fbc.png",
+    "static/media/weapon.png": "/archnemesis-unfuckery/static/media/weapon.ec7f8e7e38fd18bdbb88.png",
+    "static/media/breach.png": "/archnemesis-unfuckery/static/media/breach.f7023b49bf43be0ae437.png",
+    "static/media/armour.png": "/archnemesis-unfuckery/static/media/armour.80ce44f432ac40031ac1.png",
+    "static/media/essences.png": "/archnemesis-unfuckery/static/media/essences.62e0ea84c19544f8a3fb.png",
+    "static/media/gems.png": "/archnemesis-unfuckery/static/media/gems.c70098e49759e62fa9c4.png",
+    "static/media/maps.png": "/archnemesis-unfuckery/static/media/maps.e050ee71c876f9b804cc.png",
+    "static/media/uniques.png": "/archnemesis-unfuckery/static/media/uniques.7ba1c28fd7294fea06d1.png",
     "index.html": "/archnemesis-unfuckery/index.html",
     "main.9303b3de.css.map": "/archnemesis-unfuckery/static/css/main.9303b3de.css.map",
-    "main.cf1ed623.js.map": "/archnemesis-unfuckery/static/js/main.cf1ed623.js.map",
+    "main.dac9d5d6.js.map": "/archnemesis-unfuckery/static/js/main.dac9d5d6.js.map",
     "787.7be6e697.chunk.js.map": "/archnemesis-unfuckery/static/js/787.7be6e697.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.9303b3de.css",
-    "static/js/main.cf1ed623.js"
+    "static/js/main.dac9d5d6.js"
   ]
 }
