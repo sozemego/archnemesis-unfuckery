@@ -42,6 +42,7 @@ const fixMap = {
   "Steel-Infused": "Steel-infused",
   "Crystal-Skinned": "Crystal-skinned",
   "Kitava-Touched": "Kitava-touched",
+  "Empowered Minions": "Empowering Minions",
   "Innocence-Touched": "Innocence-touched",
   "Shakari-Touched": "Shakari-touched",
   "Abberath-Touched": "Abberath-touched",
