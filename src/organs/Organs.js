@@ -28,6 +28,7 @@ export function Organs() {
           )
         );
       }}
+      onMouseOut={() => dispatch(setHovered(null))}
     >
       <OrganParser />
       <OrganList />
@@ -144,6 +145,7 @@ function Organ(props) {
   let isHoveredItemPartOfRecipeForMe = false;
 
   const hoveredOrgan = getOrganByName(hoveredOrganName);
+  const isHovered = hoveredOrganName === organ.name;
 
   if (hoveredOrgan) {
     isIngredientOfHoveredOrgan =
@@ -181,6 +183,9 @@ function Organ(props) {
     return allIngredients;
   }
 
+  let isTracked =
+    trackedRecipes.filter((recipe) => recipe === organ.name).length > 0;
+
   for (let trackedRecipe of trackedRecipes) {
     const ingredientsOfRecipe = getAllIngredientsOfRecipe(trackedRecipe);
     for (let ingredient of ingredientsOfRecipe) {
@@ -188,7 +193,7 @@ function Organ(props) {
         inAnyTrackedRecipeAtAnyLevel = true;
       }
     }
-    if (trackedRecipe === organ.name) {
+    if (isTracked) {
       inAnyTrackedRecipeAtAnyLevel = true;
     }
   }
@@ -202,7 +207,7 @@ function Organ(props) {
       return "3px solid red";
     }
 
-    if (hoveredOrganName === organ.name) {
+    if (isHovered) {
       return "3px solid orange";
     }
 
@@ -217,54 +222,45 @@ function Organ(props) {
     <div
       style={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         alignItems: "center",
-        width: 175,
+        justifyContent: "flex-start",
+        width: 192,
         height: 64,
-        padding: 12,
+        padding: "4px 12px 4px 12px",
         margin: 4,
         border: getBorder(),
-        borderTopLeftRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
-        borderBottomRightRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
+        borderRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
         background: canBeCompleted
           ? "#9ac29a"
           : getCount() > 0
-          ? "#c4bbbb"
+          ? "#dad6d6"
           : "white",
-        // transform: "scale(" + inAnyTrackedRecipeAtAnyLevel ? 1.25 : 1 + ")",
-        transform: "scale(" + (inAnyTrackedRecipeAtAnyLevel ? 1 : 0.85) + ")",
+        transform: "scale(" + (inAnyTrackedRecipeAtAnyLevel ? 1 : 1) + ")",
       }}
       onMouseOver={() => dispatch(setHovered(organ.name))}
+      onClick={() => !isTracked && dispatch(toggleTracking(organ.name))}
     >
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <OrganTitle organ={organ} />
+        <span style={{ paddingLeft: "2px" }}>({getCount()})</span>
+      </div>
+      <OrganRewards organ={organ} />
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
+          justifyContent: "center",
+          width: "100%",
+          flexDirection: "row",
           alignItems: "center",
-          width: "128px",
-          maxWidth: "128px",
+          visibility: isHovered ? "visible" : "hidden",
         }}
       >
-        <OrganIcon icon={organ.icon} />
-        <OrganTitle organ={organ} />
-        <OrganRewards organ={organ} />
-        {organ.ingredients.length > 0 && (
-          <button onClick={() => dispatch(toggleTracking(organ.name))}>
-            TRACK
-          </button>
-        )}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <button onClick={() => dispatch(decrementOrgan(organ.name))}>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <button
+            onClick={() => dispatch(decrementOrgan(organ.name))}
+            style={{ paddingLeft: "2px", paddingRight: "2px" }}
+          >
             -
           </button>
           <div
@@ -276,7 +272,10 @@ function Organ(props) {
           >
             {getCount()}
           </div>
-          <button onClick={() => dispatch(incrementOrgan(organ.name))}>
+          <button
+            onClick={() => dispatch(incrementOrgan(organ.name))}
+            style={{ paddingLeft: "2px", paddingRight: "2px" }}
+          >
             +
           </button>
         </div>
@@ -286,18 +285,39 @@ function Organ(props) {
             justifyContent: "center",
           }}
         >
-          {organ.ingredients.length > 0 && (
-            <button
-              onClick={() =>
-                canBeCompleted && dispatch(completeRecipe(organ.name))
-              }
-              style={{ color: canBeCompleted ? "black" : "gray" }}
-            >
-              COMPLETE
-            </button>
-          )}
+          <button
+            onClick={() =>
+              canBeCompleted && dispatch(completeRecipe(organ.name))
+            }
+            style={{
+              color: canBeCompleted ? "black" : "gray",
+              visibility:
+                canBeCompleted && organ.ingredients.length > 0 && isHovered
+                  ? "visible"
+                  : "hidden",
+            }}
+          >
+            COMPLETE
+          </button>
         </div>
       </div>
+      {organ.special && (
+        <div
+          style={{
+            border: "4px dashed gray",
+            borderRadius: "12px",
+            minWidth: "128px",
+            padding: "8px",
+            position: "absolute",
+            bottom: "54px",
+            zIndex: 5,
+            visibility: isHovered ? "visible" : "hidden",
+            backgroundColor: "white",
+          }}
+        >
+          {organ.special}
+        </div>
+      )}
     </div>
   );
 }
@@ -309,6 +329,8 @@ function OrganTitle(props) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexWrap: "none",
+        whiteSpace: "nowrap",
       }}
     >
       {props.organ.name.toUpperCase()}
@@ -389,7 +411,7 @@ function Recipe(props) {
         display: "flex",
         justifyContent: "flex-start",
         flexDirection: props.orientation === "horizontal" ? "row" : "column",
-        minWidth: "386px",
+        minWidth: "280px",
         borderBottom: props.topLevel
           ? "2px dashed gray"
           : "1px solid transparent",
@@ -425,7 +447,7 @@ function Recipe(props) {
   );
 }
 
-function RecipeOrgan(props) {
+function RecipeOrgan2(props) {
   const organCountMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
 
@@ -450,7 +472,7 @@ function RecipeOrgan(props) {
         flexDirection: "row",
         alignItems: "center",
         width: 128 * 2,
-        height: 36,
+        height: 32,
         padding: 12,
         margin: 4,
         border: getBorder(),
@@ -478,7 +500,7 @@ function RecipeOrgan(props) {
           style={{
             display: "flex",
             justifyContent: "center",
-            width: "100%",
+            width: "48px",
             flexDirection: "row",
             alignItems: "center",
           }}
@@ -488,7 +510,7 @@ function RecipeOrgan(props) {
           </button>
           <div
             style={{
-              minWidth: "36px",
+              minWidth: "16px",
               display: "flex",
               justifyContent: "center",
             }}
@@ -517,6 +539,117 @@ function RecipeOrgan(props) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function RecipeOrgan(props) {
+  const organCountMap = useSelector(getOrganCount);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const dispatch = useDispatch();
+
+  const organ = props.organ;
+  const recipes = props.recipes;
+
+  let canBeCompleted =
+    recipes.filter((recipe) => recipe.name === organ.name).length > 0;
+
+  function getBorder() {
+    return "3px solid gray";
+  }
+
+  function getCount() {
+    return organCountMap[organ.name];
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: 128 * 2,
+        minHeight: 32,
+        padding: "2px 4px 2px 4px",
+        margin: 4,
+        border: getBorder(),
+        background: canBeCompleted
+          ? "#9ac29a"
+          : getCount() > 0
+          ? "#c4bbbb"
+          : "white",
+      }}
+      onMouseOver={() => setIsHovered(true)}
+      onMouseOut={() => setIsHovered(false)}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          alignItems: "center",
+        }}
+      >
+        <OrganTitle organ={organ} />
+        <span style={{ paddingLeft: "2px" }}>({getCount()})</span>
+        <OrganRewards organ={organ} />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          visibility: isHovered ? "visible" : "hidden",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <button
+            onClick={() => dispatch(decrementOrgan(organ.name))}
+            style={{ paddingLeft: "2px", paddingRight: "2px" }}
+          >
+            -
+          </button>
+          <div
+            style={{
+              minWidth: "36px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {getCount()}
+          </div>
+          <button
+            onClick={() => dispatch(incrementOrgan(organ.name))}
+            style={{ paddingLeft: "2px", paddingRight: "2px" }}
+          >
+            +
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <button
+            onClick={() =>
+              canBeCompleted && dispatch(completeRecipe(organ.name))
+            }
+            style={{
+              color: canBeCompleted ? "black" : "gray",
+              visibility:
+                canBeCompleted && organ.ingredients.length > 0 && isHovered
+                  ? "visible"
+                  : "hidden",
+            }}
+          >
+            COMPLETE
+          </button>
+        </div>
+      </div>
+      <div></div>
     </div>
   );
 }
