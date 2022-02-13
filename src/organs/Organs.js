@@ -427,7 +427,7 @@ function calcRecipes(organsMap) {
 function calcSearchToClipboard(organ) {
   let searchString = "^(" + organ.name + ")";
   if (organ.ingredients.length > 0) {
-    searchString = "^(" + organ.ingredients.join("|") + ")";
+    searchString = '"^(' + organ.ingredients.join("|") + ')"';
   }
   navigator.clipboard.writeText(searchString);
 }
