@@ -253,7 +253,11 @@ function Organ(props) {
         transform: "scale(" + (inAnyTrackedRecipeAtAnyLevel ? 1 : 1) + ")",
       }}
       onMouseOver={() => dispatch(setHovered(organ.name))}
-      onClick={() => !isTracked && dispatch(toggleTracking(organ.name))}
+      onClick={(e) => {
+        e.target.nodeName === "DIV" &&
+          !isTracked &&
+          dispatch(toggleTracking(organ.name));
+      }}
     >
       <div style={{ display: "flex", flexDirection: "row" }}>
         <OrganTitle organ={organ} />
@@ -433,7 +437,7 @@ function Recipe(props) {
           : "1px solid transparent",
       }}
     >
-      {props.topLevel && (
+      {props.topLevel && props.showStopTracking && (
         <button onClick={() => dispatch(toggleTracking(props.recipe))}>
           STOP TRACKING
         </button>
@@ -616,6 +620,7 @@ function RecipeTracker(props) {
             recipe={recipe}
             recipes={recipes}
             orientation={orientation}
+            showStopTracking={true}
             topLevel={true}
           />
         ))}
@@ -671,6 +676,7 @@ function UnusedRecipeTracker(props) {
             recipe={recipe.name}
             recipes={recipes}
             orientation={"vertical"}
+            showStopTracking={false}
             topLevel={true}
           />
         ))}
