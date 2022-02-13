@@ -33,6 +33,8 @@ export function Organs() {
       <OrganParser />
       <OrganList />
       <RecipeTracker />
+      <AllRecipeTracker />
+      <UnusedRecipeTracker />
     </div>
   );
 }
@@ -133,6 +135,47 @@ function OrganIcon(props) {
   return null;
 }
 
+function calcIsInAnyRecipeAtAnyLevel(trackedRecipes, organName) {
+  // first check if it's tracked at the top level
+  let isTracked =
+    trackedRecipes.filter((recipe) => recipe === organName).length > 0;
+
+  if (isTracked) {
+    return true;
+  }
+
+  for (let trackedRecipe of trackedRecipes) {
+    const ingredientsOfRecipe = getAllIngredientsOfRecipe(trackedRecipe);
+    for (let ingredient of ingredientsOfRecipe) {
+      if (ingredient === organName) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function getAllIngredientsOfRecipe(recipe) {
+  const organ = getOrganByName(recipe);
+
+  if (!organ) {
+    throw new Error("No organ for recipe", recipe);
+  }
+
+  const allIngredients = [];
+
+  if (organ.ingredients.length === 0) {
+    return allIngredients;
+  }
+
+  for (let ingredient of organ.ingredients) {
+    allIngredients.push(ingredient);
+    allIngredients.push(...getAllIngredientsOfRecipe(ingredient));
+  }
+
+  return allIngredients;
+}
+
 function Organ(props) {
   const organCountMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
@@ -161,43 +204,13 @@ function Organ(props) {
   let canBeCompleted =
     recipes.filter((recipe) => recipe.name === organ.name).length > 0;
 
-  let inAnyTrackedRecipeAtAnyLevel = false;
-
-  function getAllIngredientsOfRecipe(recipe) {
-    const organ = getOrganByName(recipe);
-
-    if (!organ) {
-      throw new Error("No organ for recipe", recipe);
-    }
-
-    const allIngredients = [];
-
-    if (organ.ingredients.length === 0) {
-      return allIngredients;
-    }
-
-    for (let ingredient of organ.ingredients) {
-      allIngredients.push(ingredient);
-      allIngredients.push(...getAllIngredientsOfRecipe(ingredient));
-    }
-
-    return allIngredients;
-  }
+  let inAnyTrackedRecipeAtAnyLevel = calcIsInAnyRecipeAtAnyLevel(
+    trackedRecipes,
+    organ.name
+  );
 
   let isTracked =
     trackedRecipes.filter((recipe) => recipe === organ.name).length > 0;
-
-  for (let trackedRecipe of trackedRecipes) {
-    const ingredientsOfRecipe = getAllIngredientsOfRecipe(trackedRecipe);
-    for (let ingredient of ingredientsOfRecipe) {
-      if (ingredient === organ.name) {
-        inAnyTrackedRecipeAtAnyLevel = true;
-      }
-    }
-    if (isTracked) {
-      inAnyTrackedRecipeAtAnyLevel = true;
-    }
-  }
 
   function getBorder() {
     if (isIngredientOfHoveredOrgan) {
@@ -345,7 +358,7 @@ function OrganRewards(props) {
 
   return (
     <div style={{ display: "flex", flexWrap: "nowrap" }}>
-      {rewards.map((reward) => (
+      {rewards.map((reward, index) => (
         <img
           src={REWARDS[reward].icon}
           style={{
@@ -353,6 +366,7 @@ function OrganRewards(props) {
             height: "24px",
             marginLeft: "2px",
           }}
+          key={reward + index}
         />
       ))}
     </div>
@@ -367,6 +381,7 @@ function OrganList() {
 
   return (
     <div>
+      <h2>List of all organs</h2>
       <div
         style={{
           display: "flex",
@@ -443,102 +458,6 @@ function Recipe(props) {
             orientation={props.orientation}
           />
         ))}
-      </div>
-    </div>
-  );
-}
-
-function RecipeOrgan2(props) {
-  const organCountMap = useSelector(getOrganCount);
-  const dispatch = useDispatch();
-
-  const organ = props.organ;
-  const recipes = props.recipes;
-
-  let canBeCompleted =
-    recipes.filter((recipe) => recipe.name === organ.name).length > 0;
-
-  function getBorder() {
-    return "1px solid gray";
-  }
-
-  function getCount() {
-    return organCountMap[organ.name];
-  }
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        width: 128 * 2,
-        height: 32,
-        padding: 12,
-        margin: 4,
-        border: getBorder(),
-        background: canBeCompleted
-          ? "#9ac29a"
-          : getCount() > 0
-          ? "#c4bbbb"
-          : "white",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "128px",
-          maxWidth: "128px",
-        }}
-      >
-        <OrganIcon icon={organ.icon} />
-        <OrganTitle organ={organ} />
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            width: "48px",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <button onClick={() => dispatch(decrementOrgan(organ.name))}>
-            -
-          </button>
-          <div
-            style={{
-              minWidth: "16px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            {getCount()}
-          </div>
-          <button onClick={() => dispatch(incrementOrgan(organ.name))}>
-            +
-          </button>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          {organ.ingredients.length > 0 && (
-            <button
-              onClick={() =>
-                canBeCompleted && dispatch(completeRecipe(organ.name))
-              }
-              style={{ color: canBeCompleted ? "black" : "gray" }}
-            >
-              COMPLETE
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -697,6 +616,61 @@ function RecipeTracker(props) {
             recipe={recipe}
             recipes={recipes}
             orientation={orientation}
+            topLevel={true}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AllRecipeTracker(props) {
+  const organsMap = useSelector(getOrganCount);
+  const recipes = calcRecipes(organsMap);
+  return (
+    <div>
+      <h2>This section shows all the recipes that you can complete!</h2>
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+        {recipes.map((recipe) => (
+          <Recipe
+            key={recipe.name}
+            recipe={recipe.name}
+            recipes={recipes}
+            orientation={"vertical"}
+            topLevel={true}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UnusedRecipeTracker(props) {
+  const organsMap = useSelector(getOrganCount);
+  const trackedRecipes = useSelector(getTrackedRecipes);
+
+  const recipes = calcRecipes(organsMap).filter((recipe) => {
+    const inAnyRecipe = calcIsInAnyRecipeAtAnyLevel(
+      trackedRecipes,
+      recipe.name
+    );
+
+    return !inAnyRecipe;
+  });
+
+  return (
+    <div>
+      <h2>
+        This section shows all the recipes that you can complete, that don't use
+        any ingredients for recipes that you track!
+      </h2>
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+        {recipes.map((recipe) => (
+          <Recipe
+            key={recipe.name}
+            recipe={recipe.name}
+            recipes={recipes}
+            orientation={"vertical"}
             topLevel={true}
           />
         ))}
