@@ -424,6 +424,14 @@ function calcRecipes(organsMap) {
   });
 }
 
+function calcSearchToClipboard(organ) {
+  let searchString = "^(" + organ.name + ")";
+  if (organ.ingredients.length > 0) {
+    searchString = "^(" + organ.ingredients.join("|") + ")";
+  }
+  navigator.clipboard.writeText(searchString);
+}
+
 function Recipe(props) {
   const organ = getOrganByName(props.recipe);
   const dispatch = useDispatch();
@@ -509,6 +517,9 @@ function RecipeOrgan(props) {
       }}
       onMouseOver={() => setIsHovered(true)}
       onMouseOut={() => setIsHovered(false)}
+      onClick={(e) => {
+        calcSearchToClipboard(organ);
+      }}
     >
       <div
         style={{
