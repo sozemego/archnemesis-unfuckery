@@ -11,6 +11,8 @@ import {
   getTrackedRecipes,
   toggleTracking,
   setStateFromPoeArchnemesisScanner,
+  getCombos,
+  toggleOrganInCombo,
 } from "./organsSlice";
 import { getOrganByName, ORGANS } from "../data/organs";
 import { REWARDS } from "../data/rewards";
@@ -35,6 +37,7 @@ export function Organs() {
       <RecipeTracker />
       <AllRecipeTracker />
       <UnusedRecipeTracker />
+      <ComboTracker />
     </div>
   );
 }
@@ -117,6 +120,7 @@ export function OrganParser(props) {
       </span>
       <input
         value={value}
+        onChange={(e) => {}}
         onPaste={(event) => {
           const value = event.clipboardData.getData("text") || "";
           dispatch(
@@ -681,6 +685,84 @@ function UnusedRecipeTracker(props) {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ComboTracker(props) {
+  const combos = useSelector(getCombos);
+  return (
+    <div style={{ marginBottom: "400px" }}>
+      <h2>Here you can add combos manually that you want to track.</h2>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {combos.map((combo, index) => (
+          <Combo combo={combo} index={index} key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Combo(props) {
+  const dispatch = useDispatch();
+  const organMap = useSelector(getOrganCount);
+  const combo = props.combo;
+  const index = props.index;
+
+  const canAddOrgan = combo.length < 4;
+
+  const organsNotInCombo = ORGANS.filter(
+    (organ) =>
+      combo.filter((comboOrgan) => comboOrgan === organ.name).length === 0
+  );
+
+  const recipes = calcRecipes(organMap);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        minHeight: "24px",
+      }}
+    >
+      {combo.map((organInCombo) => (
+        <div
+          key={organInCombo}
+          style={{ display: "flex", flexDirection: "row" }}
+        >
+          <Recipe
+            recipe={organInCombo}
+            recipes={recipes}
+            orientation={"vertical"}
+            showStopTracking={false}
+            topLevel={true}
+          />
+          <button
+            style={{ maxHeight: "24px" }}
+            onClick={(e) =>
+              dispatch(toggleOrganInCombo({ organ: organInCombo, index }))
+            }
+          >
+            X
+          </button>
+        </div>
+      ))}
+      {canAddOrgan && (
+        <div>
+          <select
+            onChange={(e) =>
+              dispatch(toggleOrganInCombo({ organ: e.target.value, index }))
+            }
+          >
+            {organsNotInCombo.map((organNotInCombo) => (
+              <option value={organNotInCombo.name} key={organNotInCombo.name}>
+                {organNotInCombo.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }

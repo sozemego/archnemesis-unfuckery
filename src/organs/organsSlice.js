@@ -5,6 +5,7 @@ const initialState = {
   organs: {},
   trackedRecipes: [],
   hovered: null,
+  combos: [[]],
 };
 
 function initEmptyOrgans(organs) {
@@ -17,6 +18,7 @@ initEmptyOrgans(initialState.organs);
 
 const organsFromStorage = localStorage.getItem("organs");
 const trackedRecipesFromStorage = localStorage.getItem("trackedRecipes");
+const combosFromStorage = localStorage.getItem("combos");
 
 if (!organsFromStorage) {
   saveOrgansToLocalStorage(initialState.organs);
@@ -25,9 +27,15 @@ if (!organsFromStorage) {
 }
 
 if (!trackedRecipesFromStorage) {
-  saveTrackedRecipesToLocalStorage([]);
+  saveTrackedRecipesToLocalStorage(initialState.trackedRecipes);
 } else {
   initialState.trackedRecipes = JSON.parse(trackedRecipesFromStorage);
+}
+
+if (!combosFromStorage) {
+  saveCombosToLocalStorage(initialState.combos);
+} else {
+  initialState.combos = JSON.parse(combosFromStorage);
 }
 
 function saveOrgansToLocalStorage(organs) {
@@ -36,6 +44,11 @@ function saveOrgansToLocalStorage(organs) {
 
 function saveTrackedRecipesToLocalStorage(trackedRecipes) {
   localStorage.setItem("trackedRecipes", JSON.stringify(trackedRecipes));
+}
+
+function saveCombosToLocalStorage(combos) {
+  console.log(JSON.stringify(combos));
+  localStorage.setItem("combos", JSON.stringify(combos));
 }
 
 /**
@@ -93,6 +106,32 @@ export const organSlice = createSlice({
 
       saveOrgansToLocalStorage(state.organs);
     },
+    addCombo: (state, action) => {
+      state.combos.push([action.payload]);
+      saveCombosToLocalStorage(state.combos);
+    },
+    toggleOrganInCombo: (state, action) => {
+      const { organ, index } = action.payload;
+      const combo = state.combos[index];
+      const nextCombo = state.combos[index + 1];
+
+      const organIndex = combo.findIndex((comboOrgan) => comboOrgan === organ);
+      if (organIndex > -1) {
+        combo.splice(organIndex, 1);
+
+        if (combo.length === 0 && nextCombo && nextCombo.length === 0) {
+          // remove empty row
+          state.combos.splice(index, 1);
+        }
+      } else {
+        combo.push(organ);
+        if (!nextCombo) {
+          state.combos.push([]);
+        }
+      }
+
+      saveCombosToLocalStorage(state.combos);
+    },
   },
 });
 
@@ -104,10 +143,13 @@ export const {
   setHovered,
   toggleTracking,
   setStateFromPoeArchnemesisScanner,
+  addCombo,
+  toggleOrganInCombo,
 } = organSlice.actions;
 
 export const getOrganCount = (state) => state.organs.organs;
 export const getHovered = (state) => state.organs.hovered;
 export const getTrackedRecipes = (state) => state.organs.trackedRecipes;
+export const getCombos = (state) => state.organs.combos;
 
 export default organSlice.reducer;
