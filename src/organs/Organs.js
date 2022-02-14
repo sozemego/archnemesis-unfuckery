@@ -248,6 +248,7 @@ function Organ(props) {
         padding: "4px 12px 4px 12px",
         margin: 4,
         border: getBorder(),
+        position: "relative",
         borderRadius: inAnyTrackedRecipeAtAnyLevel ? "0px" : "25px",
         background: canBeCompleted
           ? "#9ac29a"
@@ -332,7 +333,7 @@ function Organ(props) {
             padding: "8px",
             position: "absolute",
             bottom: "54px",
-            zIndex: 5,
+            zIndex: 6,
             visibility: isHovered ? "visible" : "hidden",
             backgroundColor: "white",
           }}
@@ -508,6 +509,7 @@ function RecipeOrgan(props) {
         minHeight: 32,
         padding: "2px 4px 2px 4px",
         margin: 4,
+        position: "relative",
         border: getBorder(),
         background: canBeCompleted
           ? "#9ac29a"
@@ -588,6 +590,23 @@ function RecipeOrgan(props) {
           </button>
         </div>
       </div>
+      {organ.special && (
+        <div
+          style={{
+            border: "4px dashed gray",
+            borderRadius: "12px",
+            minWidth: "128px",
+            padding: "8px",
+            position: "absolute",
+            bottom: "54px",
+            zIndex: 5,
+            visibility: isHovered ? "visible" : "hidden",
+            backgroundColor: "white",
+          }}
+        >
+          {organ.special}
+        </div>
+      )}
     </div>
   );
 }
