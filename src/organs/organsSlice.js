@@ -119,7 +119,7 @@ export const organSlice = createSlice({
       if (organIndex > -1) {
         combo.splice(organIndex, 1);
 
-        if (combo.length === 0 && nextCombo && nextCombo.length === 0) {
+        if (combo.length === 0 && nextCombo) {
           // remove empty row
           state.combos.splice(index, 1);
         }

@@ -501,6 +501,7 @@ function RecipeOrgan(props) {
 
   return (
     <div
+      id="recipe-organ-container"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -733,6 +734,11 @@ function ComboTracker(props) {
   );
 }
 
+function calcComboSearchToClipboard(combo) {
+  const searchString = '"^(' + combo.join("|") + ')"';
+  navigator.clipboard.writeText(searchString);
+}
+
 function Combo(props) {
   const dispatch = useDispatch();
   const organMap = useSelector(getOrganCount);
@@ -756,6 +762,9 @@ function Combo(props) {
         minHeight: "24px",
       }}
     >
+      {combo.length > 0 && (
+        <button onClick={(e) => calcComboSearchToClipboard(combo)}>COPY</button>
+      )}
       {combo.map((organInCombo) => (
         <div
           key={organInCombo}
@@ -792,6 +801,9 @@ function Combo(props) {
             ))}
           </select>
         </div>
+      )}
+      {combo.length > 0 && (
+        <button onClick={(e) => calcComboSearchToClipboard(combo)}>COPY</button>
       )}
     </div>
   );
