@@ -735,7 +735,13 @@ function ComboTracker(props) {
 }
 
 function calcComboSearchToClipboard(combo) {
-  const searchString = '"^(' + combo.join("|") + ')"';
+  const searchString =
+    '"^(' +
+    combo
+      .map((element) => element.split(" ")[0])
+      .map((element) => element.split("-touched")[0])
+      .join("|") +
+    ')"';
   navigator.clipboard.writeText(searchString);
 }
 
