@@ -765,6 +765,8 @@ function Combo(props) {
   );
 
   const recipes = calcRecipes(organMap);
+  const canBeCompleted =
+    combo.filter((organ) => organMap[organ] > 0).length === combo.length;
 
   return (
     <div
@@ -815,7 +817,16 @@ function Combo(props) {
         </div>
       )}
       {combo.length > 0 && (
-        <button onClick={(e) => calcComboSearchToClipboard(combo)}>COPY</button>
+        <button
+          onClick={(e) => {
+            for (let organ of combo) {
+              dispatch(decrementOrgan(organ));
+            }
+          }}
+          disabled={!canBeCompleted}
+        >
+          COMPLETE
+        </button>
       )}
     </div>
   );
