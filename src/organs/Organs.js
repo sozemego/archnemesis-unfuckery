@@ -38,6 +38,7 @@ export function Organs() {
       <AllRecipeTracker />
       <UnusedRecipeTracker />
       <ComboTracker />
+      <OverlappingRecipeTracker />
     </div>
   );
 }
@@ -729,7 +730,7 @@ function UnusedRecipeTracker(props) {
 function ComboTracker(props) {
   const combos = useSelector(getCombos);
   return (
-    <div style={{ marginBottom: "400px" }}>
+    <div>
       <h2>Here you can add combos manually that you want to track.</h2>
       <div style={{ display: "flex", flexDirection: "column" }}>
         {combos.map((combo, index) => (
@@ -828,6 +829,104 @@ function Combo(props) {
           COMPLETE
         </button>
       )}
+    </div>
+  );
+}
+
+function OverlappingRecipeTracker(props) {
+  const organCount = useSelector(getOrganCount);
+  const recipes = calcRecipes(organCount);
+
+  const overlappingRecipes = [];
+
+  function findRecipeWithMatchingIngredients(recipe) {
+    const recipeIngredients = recipe.ingredients;
+    const recipeIngredientsLength = recipeIngredients.length;
+    for (let otherRecipe of recipes) {
+      if (otherRecipe === recipe) {
+        continue;
+      }
+
+      const otherRecipeIngredients = otherRecipe.ingredients;
+      const otherRecipeIngredientsLength = otherRecipeIngredients.length;
+
+      const expectedLengthWithNoOverlap =
+        recipeIngredientsLength + otherRecipeIngredientsLength;
+      const overlappingOrgans = [
+        ...new Set([...recipeIngredients, ...otherRecipeIngredients]),
+      ];
+      const actualLength = overlappingOrgans.length;
+
+      if (actualLength !== expectedLengthWithNoOverlap) {
+        return [recipe, otherRecipe, overlappingOrgans];
+      }
+
+      return null;
+    }
+    return null;
+  }
+
+  for (let recipe of recipes) {
+    const matchingRecipe = findRecipeWithMatchingIngredients(recipe);
+    if (matchingRecipe) {
+      overlappingRecipes.push(matchingRecipe);
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: "400px" }}>
+      <h2>
+        Tracks all recipes that have overlapping organs (e.g. you can complete
+        two recipes, but don't use the full set of organs)
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {overlappingRecipes.map((overlappingRecipe) => (
+          <div
+            style={{ display: "flex", flexDirection: "row" }}
+            key={overlappingRecipe[0].name}
+          >
+            <Recipe
+              recipe={overlappingRecipe[0].name}
+              recipes={recipes}
+              orientation={"vertical"}
+              showStopTracking={false}
+              topLevel={true}
+            />
+            <Recipe
+              recipe={overlappingRecipe[1].name}
+              recipes={recipes}
+              orientation={"vertical"}
+              showStopTracking={false}
+              topLevel={true}
+            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                flexWrap: "wrap",
+                maxWidth: "620px",
+                borderLeft: "1px dashed gray",
+              }}
+            >
+              {overlappingRecipe[2].map((ingredient) => (
+                <RecipeOrgan
+                  key={ingredient}
+                  organ={getOrganByName(ingredient)}
+                  recipes={recipes}
+                />
+              ))}
+              <button
+                onClick={(e) =>
+                  calcComboSearchToClipboard(overlappingRecipe[2])
+                }
+              >
+                COPY
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
