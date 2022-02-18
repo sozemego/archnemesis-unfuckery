@@ -405,7 +405,7 @@ export const ORGANS = [
     rewards: ["Weapon", "Weapon"],
     special: "Rewards are rolled 1 additional time, choosing the rarest result",
     tier: 2,
-    ingredients: ["Incendiary", "Bonebreaker", "Gargantuan"],
+    ingredients: ["Incendiary", "Bonebreaker"],
   },
   {
     name: "Mirror Image",
@@ -415,7 +415,7 @@ export const ORGANS = [
     special:
       "Rewards are rolled 2 additional times, choosing the rarest result",
     tier: 2,
-    ingredients: ["Soul Conduit", "Echoist", "Gargantuan"],
+    ingredients: ["Soul Conduit", "Echoist"],
   },
   {
     name: "Storm Strider",
