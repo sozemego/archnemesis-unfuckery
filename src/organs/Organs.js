@@ -383,15 +383,35 @@ function OrganRewards(props) {
   );
 }
 
+const initialSort = localStorage.getItem("initialSort") || "default";
+
 function OrganList() {
+  const [sort, setSort] = React.useState(initialSort);
   const organsMap = useSelector(getOrganCount);
   const dispatch = useDispatch();
 
   const recipes = calcRecipes(organsMap);
 
+  React.useEffect(() => localStorage.setItem("initialSort", sort), [sort]);
+
+  function getOrgans() {
+    if (sort === "default") {
+      return ORGANS;
+    }
+    if (sort === "count") {
+      const organs = [...ORGANS];
+      organs.sort((o1, o2) => organsMap[o2.name] - organsMap[o1.name]);
+      return organs;
+    }
+  }
+
   return (
     <div>
       <h2>List of all organs</h2>
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <button onClick={() => setSort("count")}>SORT BY COUNT</button>
+        <button onClick={() => setSort("default")}>SORT BY DEFAULT</button>
+      </div>
       <div
         style={{
           display: "flex",
@@ -402,7 +422,7 @@ function OrganList() {
         <button onClick={() => dispatch(clearAll())}>CLEAR ALL</button>
       </div>
       <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-        {ORGANS.map((organ) => (
+        {getOrgans().map((organ) => (
           <Organ key={organ.name} organ={organ} recipes={recipes} />
         ))}
       </div>
