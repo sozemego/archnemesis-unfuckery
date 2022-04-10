@@ -47,7 +47,6 @@ function saveTrackedRecipesToLocalStorage(trackedRecipes) {
 }
 
 function saveCombosToLocalStorage(combos) {
-  console.log(JSON.stringify(combos));
   localStorage.setItem("combos", JSON.stringify(combos));
 }
 

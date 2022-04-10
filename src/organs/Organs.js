@@ -151,9 +151,13 @@ function calcIsInAnyRecipeAtAnyLevel(trackedRecipes, organName) {
 
   for (let trackedRecipe of trackedRecipes) {
     const ingredientsOfRecipe = getAllIngredientsOfRecipe(trackedRecipe);
+    const ingredientsOfOrganName = getAllIngredientsOfRecipe(organName);
+    ingredientsOfOrganName.push(organName);
     for (let ingredient of ingredientsOfRecipe) {
-      if (ingredient === organName) {
-        return true;
+      for (let ingredientOfOrgan of ingredientsOfOrganName) {
+        if (ingredient === ingredientOfOrgan) {
+          return true;
+        }
       }
     }
   }
