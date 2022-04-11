@@ -716,11 +716,25 @@ function AllRecipeTracker(props) {
   );
 }
 
+function getAllOrgansWithoutIngredients() {
+  return ORGANS.filter(
+    (organ) => organ.ingredients.length === 0 || !organ.ingredients
+  );
+}
+
 function UnusedRecipeTracker(props) {
   const organsMap = useSelector(getOrganCount);
   const trackedRecipes = useSelector(getTrackedRecipes);
 
-  const recipes = calcRecipes(organsMap).filter((recipe) => {
+  const allOrgansWithoutRecipes = getAllOrgansWithoutIngredients().filter(
+    (organ) => organsMap[organ.name] > 0
+  );
+  const allOrgansOrRecipes = [
+    ...calcRecipes(organsMap),
+    ...allOrgansWithoutRecipes,
+  ];
+
+  const allCompletableOrgansOrRecipes = allOrgansOrRecipes.filter((recipe) => {
     const inAnyRecipe = calcIsInAnyRecipeAtAnyLevel(
       trackedRecipes,
       recipe.name
@@ -732,15 +746,15 @@ function UnusedRecipeTracker(props) {
   return (
     <div>
       <h2>
-        This section shows all the recipes that you can complete, that don't use
-        any ingredients for recipes that you track!
+        This section shows all the recipes or organs that you can complete, that
+        don't use any ingredients for recipes that you track!
       </h2>
       <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-        {recipes.map((recipe) => (
+        {allCompletableOrgansOrRecipes.map((recipe) => (
           <Recipe
             key={recipe.name}
             recipe={recipe.name}
-            recipes={recipes}
+            recipes={allCompletableOrgansOrRecipes}
             orientation={"vertical"}
             showStopTracking={false}
             topLevel={true}
